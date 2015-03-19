@@ -1,0 +1,27 @@
+{
+  "author": {
+    "name": "yieme"
+  },
+  "name": "strapdown",
+  "version": "0.6.4",
+  "dependencies": {},
+  "devDependencies": {
+    "grunt": "~0.4.5",
+    "grunt-contrib-concat": "~0.5.0",
+    "grunt-contrib-watch": "~0.6.1",
+    "grunt-contrib-uglify": "~0.5.1",
+    "grunt-contrib-jshint": "~0.10.0",
+    "grunt-contrib-qunit": "~0.5.2",
+    "grunt-text-replace": "~0.3.12",
+    "clean-css": "~2.2.12",
+    "grunt-contrib-less": "~0.11.4",
+    "grunt-contrib-clean": "~0.6.0",
+    "grunt-preprocess": "~4.0.0",
+    "grunt-contrib-copy": "~0.5.0"
+  },
+  "readme": "# Strapdown.js\n\nStrapdown.js makes it embarrassingly simple to create elegant Markdown documents. No server-side compilation required.  \n\nThis is a fork of the awesome project at http://strapdownjs.com\n\nThis fork adds auto generated table of contents and can be used as a jQuery plugin.\n\nFor more, please see:\n\n+ http://github.com/yieme/strapdown\n\n## Sample\n\n[View Live](http://yie.me/strapdown)\n\n![](https://raw.githubusercontent.com/yieme/strapdown/gh-pages/sample.png)\n\n\n## Contributor guide\n\nYou will need Node.js (>0.6.x) and Bower to generate the bundles. To bundle/compile the assets, issue in the project directory:\n\n```\n$ npm install\n$ bower install\n$ grunt\n```\n\nOther available commands are:\n\n- `grunt watch` - refreshes the output files on where are changed.\n- `grunt test` - only runs the tests\n\nBug fixes should go in the latest version - no need to bump it. New features or anything that changes the old behavior should go into a bumped version (update **version** in `package.json`)\n\n[1]:https://www.npmjs.org/package/coffee-script\n[2]:https://www.npmjs.org/package/less\n",
+  "readmeFilename": "README.md",
+  "description": "Strapdown.js makes it embarrassingly simple to create elegant Markdown documents. No server-side compilation required.",
+  "_id": "strapdown@0.6.4",
+  "_from": "strapdown@"
+}
