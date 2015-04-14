@@ -102,6 +102,168 @@ HyperCat was developed to solve a real need for interoperability amongst 8 conso
 
 The work was funded by the UK’s Technology Strategy Board https://connect.innovateuk.org/web/internet-of-things-ecosystem-demonstrator/article-view/-/blogs/the-list-of-8-internet-of-things-clusters
 
+# Examples of using HyperCat
+
+## HyperCat and SenML
+
+HyperCat can point at any resource with a URL or URI. One common resource type (as used by the HyperCat Phase1 OpenIoT cluster) is SenML for representing time-series sensor data.
+
+### SenML
+
+SenML is a media type for representing simple sensor measurements and device parameters.
+Representations are available for XML, EXI (Efficient XML Interchange) and JSON.
+SenML is defined by http://tools.ietf.org/html/draft-jennings-senml-10
+
+This examples uses just the JSON representation, `application/senml+json`.
+
+Every valid SenML document is a JSON object with an array of event objects.
+
+    {
+      "e": [
+      ]
+    }
+
+Each event object contains a name `n`, a value `v` and an optional timestamp `t` in seconds since 01/01/1970 (UNIX epoch).
+Events may also contain a units `u` declaration.
+
+Documents may contain a single event with no timestamp (considered to be a "live" value)
+
+Here, our `n` value is a URI giving a unique identifier for this sensor and parameter. This is optional.
+
+    {
+      "e": [
+        { "n": "http://example.org/sensor1/temperature", "v":22.5 }
+      ]
+    }
+
+Documents may contain declarations of units according to the units registry in the SenML specification.
+
+    {
+      "e": [
+        { "n": "http://example.org/sensor1/temperature", "u": "Cel", "v":22.5 }
+      ]
+    }
+
+Documents may contain single or multiple timestamped events
+
+    {
+      "e": [
+        { "n": "http://example.org/sensor1/temperature", "u": "Cel", "t": 1234, "v":22.5 },
+        { "n": "http://example.org/sensor1/temperature", "u": "Cel", "t": 1235, "v":22.8 },
+        { "n": "http://example.org/sensor1/temperature", "u": "Cel", "t": 1236, "v":22.2 }
+      ]
+    }
+
+Or, events for multiple resources
+
+    {
+      "e": [
+        { "n": "http://example.org/sensor1/temperature", "u": "Cel", "t": 1234, "v":22.5 },
+        { "n": "http://example.org/sensor1/light", "u": "lm", "t": 1235, "v":135 },
+        { "n": "http://example.org/sensor2/acidity", "u": "pH", "t": 1235, "v":7 }
+      ]
+    }
+
+To shorten documents and improve readability, an optional base name (`bn`) may be given to be used as a prefix for all resource names. The following two documents are equivalent
+
+    {
+      "e": [
+        { "n": "http://example.org/sensor1/temperature", "u": "Cel", "t": 1234, "v":22.5 },
+        { "n": "http://example.org/sensor1/light", "u": "lm", "t": 1235, "v":135 }
+      ]
+    }
+
+    {
+      "e": [
+        { "n": "temperature", "u": "Cel", "t": 1234, "v":22.5 },
+        { "n": "light", "u": "lm", "t": 1235, "v":135 }
+      ],
+      "bn": "http://example.org/sensor1/"
+    }
+
+To shorten documents and improve readability, an optional base time may be given. All times `t` are deltas from the base time (`bt`). The following two documents are equivalent
+
+    {
+      "e": [
+        { "n": "http://example.org/sensor1/temperature", "u": "Cel", "t": 1234, "v":22.5 },
+        { "n": "http://example.org/sensor1/light", "u": "lm", "t": 1235, "v":135 }
+      ]
+    }
+
+    {
+      "e": [
+        { "n": "temperature", "u": "Cel", "t": 0, "v":22.5 },
+        { "n": "light", "u": "lm", "t": 1, "v":135 }
+      ],
+      "bt": 1234
+    }
+
+
+#### SenML with HyperCat
+
+HyperCat is a file format and API designed for discovery of resources by web clients.
+Although data can be carried both by SenML resources and in HyperCat catalogues themselves, as a general guide - more static data (metadata) about assets should be in catalogues while sensor readings and rapidly changing values should be in SenML or other resources.
+
+For example, a streetlight is (relatively) immobile so its geographic position should be carried in HyperCat metadata. However, its live power consumption is constantly varying over time and should be provided in a resource pointed to by the catalogue, such as SenML.
+
+Conversely, a vehicle’s geographic position is constantly varying so should be carried in a resource, such as SenML. The license number, make and model of the vehicle could be carried in HyperCat metadata.
+
+When SenML documents are listed in HyperCat, they use the metadata relation
+
+    {"rel":"urn:X-tsbiot:rels:isContentType","val":"application/senml+json"}
+
+When listing SenML resources in HyperCat, the HyperCat `href` link should point to the URL of a SenML document.
+
+Individual resources in the SenML document may be named such that they are prefixed by the SenML document’s URL, either manually or by using the `bn` attribute. A data crawler is then able to relate the two from their paths.
+
+Here follows an example catalogue and SenML document:
+
+    {
+        "item-metadata":[
+            {
+                "rel":"urn:X-tsbiot:rels:isContentType",
+                "val":"application/vnd.tsbiot.catalogue+json"
+            },
+            {
+                "rel":"urn:X-tsbiot:rels:hasDescription:en",
+                "val":"Sensor example"
+            }
+        ],
+        "items":[
+            {
+                "href":"https://example.org/sensor1",
+                "i-object-metadata":[
+                    {
+                        "rel":"urn:X-tsbiot:rels:isContentType",
+                        "val":"application/senml+json"
+                    },
+                    {
+                        "rel":"urn:X-tsbiot:rels:hasDescription:en",
+                        "val":"Sensor number one"
+                    },
+                    {
+                        "rel":"http://www.w3.org/2003/01/geo/wgs84_pos#long",
+                        "val":"-0.57"
+                    },
+                    {
+                        "rel":"http://www.w3.org/2003/01/geo/wgs84_pos#lat",
+                        "val":"51.23"
+                    }
+                ]
+            }
+        ]
+    }
+
+
+    {
+        "e":[
+            {"n":"temperature", "t":12345, "v":22.5, "u":"Cel"},
+            {"n":"temperature", "t":12346, "v":22.7, "u":"Cel"},
+            {"n":"temperature", "t":12347, "v":22.4, "u":"Cel"},
+            {"n":"power", "t":12345, "v":100, "u":"W"}
+        ],
+        "bn":"https://example.org/sensor1/"
+    }
 
 </textarea>
 <script src="dist/strapdown.js"></script>
